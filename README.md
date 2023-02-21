@@ -11,4 +11,3 @@ Student Info
 
 * Student Name: Nguyễn Đắc Minh Khôi
 * Student ID: BI12-218
-
