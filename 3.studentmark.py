@@ -1,3 +1,5 @@
+import math
+
 class Student:
     def __init__(self, id, name, dob):
         self.id = id
@@ -13,6 +15,7 @@ class Course:
     def input_marks(self, students):
         for student in students:
             mark = float(input(f"Enter mark for {student.name} in {self.name}: "))
+            mark = math.floor(mark * 10) / 10.0 # round down to 1 decimal
             self.marks[student.id] = mark
 
     def show_marks(self, students):
