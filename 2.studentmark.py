@@ -73,3 +73,41 @@ class School:
         else:
             print("Invalid course ID or marks not yet input")
 
+# Main program
+school = School()
+
+num_students = int(input("Enter the number of students in the class: "))
+for i in range(num_students):
+    print(f"\nEnter information for student {i+1}:")
+    student = school.input_student_information()
+    school.add_student(student)
+
+num_courses = int(input("\nEnter the number of courses: "))
+for i in range(num_courses):
+    print(f"\nEnter information for course {i+1}:")
+    course = school.input_course_information()
+    school.add_course(course)
+
+while True:
+    print("\nSelect an option:")
+    print("1. Input marks for a course")
+    print("2. List courses")
+    print("3. List students")
+    print("4. Show student marks for a course")
+    print("5. Quit")
+    option = input("Option: ")
+
+    if option == "1":
+        school.input_marks_for_course()
+
+    elif option == "2":
+        school.list_courses()
+
+    elif option == "3":
+        school.list_students()
+
+    elif option == "4":
+        school.show_student_marks_for_course()
+
+    elif option == "5":
+        break
