@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import curses
 
 class Student:
     def __init__(self, id, name, dob):
@@ -14,17 +15,22 @@ class Course:
         self.credits = credits
         self.marks = {}
 
-    def input_marks(self, students):
+    def input_marks(self, students, screen):
         for student in students:
-            mark = float(input(f"Enter mark for {student.name} in {self.name}: "))
+            screen.addstr(f"Enter mark for {student.name} in {self.name}: ")
+            screen.refresh()
+            mark = float(screen.getstr().decode())
             mark = math.floor(mark * 10) / 10.0 # round down to 1 decimal
             self.marks[student.id] = mark
 
-    def show_marks(self, students):
-        print(f"Marks for {self.name} ({self.id}):")
+    def show_marks(self, students, screen):
+        screen.addstr(f"Marks for {self.name} ({self.id}):\n")
         for student in students:
             mark = self.marks.get(student.id, '-')
-            print(f"{student.name}: {mark}")
+            screen.addstr(f"{student.name}: {mark}\n")
+
+    def __str__(self):
+        return f"ID: {self.id}, Name: {self.name}, Credits: {self.credits}"
 
 class School:
     def __init__(self):
@@ -37,51 +43,69 @@ class School:
     def add_course(self, course):
         self.courses.append(course)
 
-    def input_student_information(self):
-        student_id = input("Enter student ID: ")
-        student_name = input("Enter student name: ")
-        student_dob = input("Enter student date of birth (DD/MM/YYYY): ")
+    def input_student_information(self, screen):
+        screen.addstr("Enter student ID: ")
+        screen.refresh()
+        student_id = screen.getstr().decode()
+        screen.addstr("Enter student name: ")
+        screen.refresh()
+        student_name = screen.getstr().decode()
+        screen.addstr("Enter student date of birth (DD/MM/YYYY): ")
+        screen.refresh()
+        student_dob = screen.getstr().decode()
         student = Student(student_id, student_name, student_dob)
         return student
 
-    def input_course_information(self):
-        course_id = input("Enter course ID: ")
-        course_name = input("Enter course name: ")
-        course_credits = float(input("Enter course credits: "))
+    def input_course_information(self, screen):
+        screen.addstr("Enter course ID: ")
+        screen.refresh()
+        course_id = screen.getstr().decode()
+        screen.addstr("Enter course name: ")
+        screen.refresh()
+        course_name = screen.getstr().decode()
+        screen.addstr("Enter course credits: ")
+        screen.refresh()
+        course_credits = float(screen.getstr().decode())
         course = Course(course_id, course_name, course_credits)
         return course
 
-    def list_courses(self):
-        print("List of courses:")
+    def list_courses(self, screen):
+        screen.addstr("List of courses:\n")
         for course in self.courses:
-            print(f"ID: {course.id}, Name: {course.name}, Credits: {course.credits}")
+            screen.addstr(f"ID: {course.id}, Name: {course.name}, Credits: {course.credits}\n")
 
-    def list_students(self):
-        print("List of students:")
+    def list_students(self, screen):
+        screen.addstr("List of students:\n")
         for student in self.students:
-            print(f"ID: {student.id}, Name: {student.name}, Date of Birth: {student.dob}")
+            screen.addstr(f"ID: {student.id}, Name: {student.name}, Date of Birth: {student.dob}\n")
 
-    def input_marks_for_course(self):
-        self.list_courses()
-        course_id = input("Enter the course ID: ")
+    def input_marks_for_course(self, screen):
+        self.list_courses(screen)
+        screen.addstr("Enter the course ID: ")
+        screen.refresh()
+        course_id = screen.getstr().decode()
         course = next((c for c in self.courses if c.id == course_id), None)
         if course:
-            course.input_marks(self.students)
+            course.input_marks(self.students, screen)
         else:
-            print("Invalid course ID")
+            screen.addstr("Invalid course ID\n")
 
-    def show_student_marks_for_course(self):
-        self.list_courses()
-        course_id = input("Enter the course ID: ")
+    def show_student_marks_for_course(self, screen):
+        self.list_courses(screen)
+        course_id = screen.addstr("Enter the course ID: ")
+        screen.refresh()
+        course_id = screen.getstr().decode()
         course = next((c for c in self.courses if c.id == course_id), None)
         if course and course.marks:
-            course.show_marks(self.students)
+            course.show_marks(self.students, screen)
         else:
-            print("Invalid course ID or marks not yet input")
+            screen.addstr("Invalid course ID or marks not yet input\n")
 
-    def calculate_gpa_for_student(self):
-        self.list_students()
-        student_id = input("Enter the student ID: ")
+    def calculate_gpa_for_student(self, screen):
+        self.list_students(screen)
+        student_id = screen.addstr("Enter the student ID: ")
+        screen.refresh()
+        student_id = screen.getstr().decode()
         student = next((s for s in self.students if s.id == student_id), None)
         if student:
             marks = []
@@ -94,11 +118,11 @@ class School:
             credits = np.array(credits)
             if np.sum(credits) > 0:
                 gpa = np.sum(marks * credits) / np.sum(credits)
-                print(f"GPA for {student.name}: {gpa:.2f}")
+                screen.addstr(f"GPA for {student.name}: {gpa:.2f}")
             else:
-                print(f"No credits found for {student.name}")
+                screen.addstr(f"No credits found for {student.name}")
     
-    def sort_students_by_gpa_descending(self):
+    def sort_students_by_gpa_descending(self, screen):
         student_gpas = []
         for student in self.students:
             marks = []
@@ -114,52 +138,69 @@ class School:
                 student_gpas.append((student, gpa))
             sorted_student_gpas = sorted(student_gpas, key=lambda x: x[1], reverse=True)
         for student, gpa in sorted_student_gpas:
-            print(f"{student.name}: {gpa:.2f}")
-
+            screen.addstr(f"{student.name}: {gpa:.2f}")
 
 # Main program
 school = School()
+screen = curses.initscr()
+screen.clear()
 
-num_students = int(input("Enter the number of students in the class: "))
+num_students = screen.addstr("\nEnter the number of students: ")
+screen.refresh()
+num_students = int(screen.getstr().decode())
 for i in range(num_students):
-    print(f"\nEnter information for student {i+1}:")
-    student = school.input_student_information()
+    screen.addstr(f"\nEnter information for student {i+1}:")
+    student = school.input_student_information(screen)
     school.add_student(student)
 
-num_courses = int(input("\nEnter the number of courses: "))
+num_courses = screen.addstr("\nEnter the number of courses: ")
+screen.refresh()
+num_courses = int(screen.getstr().decode())
 for i in range(num_courses):
-    print(f"\nEnter information for course {i+1}:")
-    course = school.input_course_information()
+    screen.addstr(f"\nEnter information for course {i+1}:")
+    course = school.input_course_information(screen)
     school.add_course(course)
 
 while True:
-    print("\nSelect an option:")
-    print("1. Input marks for a course")
-    print("2. List courses")
-    print("3. List students")
-    print("4. Show student marks for a course")
-    print("5. Calculate GPA for a student")
-    print("6. Sort students by GPA (descending)")
-    print("7. Quit")
-    option = input("Option: ")
+    screen = curses.initscr()
+    screen.clear()
+    screen.addstr("\nSelect an option:")
+    screen.addstr("\n1. Input marks for a course")
+    screen.addstr("\n2. List courses")
+    screen.addstr("\n3. List students")
+    screen.addstr("\n4. Show student marks for a course")
+    screen.addstr("\n5. Calculate GPA for a student")
+    screen.addstr("\n6. Sort students by GPA (descending)")
+    screen.addstr("\n7. Quit")
+    screen.addstr("\nOption: ")
+    screen.refresh()
+    option = screen.getstr().decode()
+    screen.clear()
 
     if option == "1":
-        school.input_marks_for_course()
+        school.input_marks_for_course(screen)
 
     elif option == "2":
-        school.list_courses()
+        school.list_courses(screen)
 
     elif option == "3":
-        school.list_students()
+        school.list_students(screen)
 
     elif option == "4":
-        school.show_student_marks_for_course()
+        school.show_student_marks_for_course(screen)
 
     elif option == "5":
-        school.calculate_gpa_for_student()
-
+        school.calculate_gpa_for_student(screen)
+ 
     elif option == "6":
-        school.sort_students_by_gpa_descending()
+        school.sort_students_by_gpa_descending(screen)
 
     elif option == "7":
         break
+
+    else:
+        screen.addstr("Invalid option")
+   
+    screen.addstr("\nPress any key to continue...")
+    screen.refresh()
+    screen.getch()
