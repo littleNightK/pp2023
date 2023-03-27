@@ -29,9 +29,6 @@ class Course:
             mark = self.marks.get(student.id, '-')
             screen.addstr(f"{student.name}: {mark}\n")
 
-    def __str__(self):
-        return f"ID: {self.id}, Name: {self.name}, Credits: {self.credits}"
-
 class School:
     def __init__(self):
         self.students = []
